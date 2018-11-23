@@ -1,27 +1,37 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import Login from './pages/Login';
+import OnboardForm from './components/onboarding/OnboardForm';
+
+import { firebase, db, auth } from './firebase';
 
 class App extends Component {
+  state = {
+    isSignedIn: null,
+    showOnbord: true
+  }
+  componentDidMount() {
+    firebase.auth.onAuthStateChanged(async user => {
+      this.setState({ isSignedIn: !!user });
+      console.log("user", user);
+      const u = await db.isUserOnboarded(user);
+      console.log(u)
+      if (user) {
+        if (db.isUserOnboarded(user) === true) {
+          this.setState({ showOnboard: false });
+        }
+      }
+    });
+  }
+
+
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
+    if (this.state.isSignedIn === false) {
+      return <Login />
+    }
+
+    if (this.state.showOnbord === true) {
+      return <OnboardForm />
+    }
   }
 }
 
